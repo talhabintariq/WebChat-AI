@@ -3,16 +3,25 @@ from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_community.document_loaders import WebBaseLoader
+from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
+# from bs4 import BeautifulSoup as Soup
 import chromadb
 
 def get_vectorstore_from_url(url):
     # Load and split the webpage content into manageable chunks
-    loader = WebBaseLoader(url)
+    loader = RecursiveUrlLoader(
+        url=url,
+        max_depth=1,
+    )
     document = loader.load()
-    text_splitter = RecursiveCharacterTextSplitter()
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=100,
+        length_function=len,
+        separators=["\n\n", "\n", " ", ""]  # Optimized splitting
+    )
     document_chunks = text_splitter.split_documents(document)
     
     # Initialize persistent Chroma vector database with OpenAI embeddings
