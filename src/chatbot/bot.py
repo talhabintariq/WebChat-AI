@@ -1,3 +1,4 @@
+import re
 import streamlit as st
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -6,14 +7,19 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-# from bs4 import BeautifulSoup as Soup
+from bs4 import BeautifulSoup
 import chromadb
+
+def bs4_extractor(html: str) -> str:
+    soup = BeautifulSoup(html, "lxml")
+    return re.sub(r"\n\n+", "\n\n", soup.text).strip()
 
 def get_vectorstore_from_url(url):
     # Load and split the webpage content into manageable chunks
     loader = RecursiveUrlLoader(
         url=url,
-        max_depth=1,
+        max_depth=2,
+        extractor=bs4_extractor
     )
     document = loader.load()
     text_splitter = RecursiveCharacterTextSplitter(
@@ -73,4 +79,4 @@ def get_response(user_input):
         "chat_history": st.session_state.chat_history,
         "input": user_input,
     })
-    return response['answer'] 
+    return response['answer']  
