@@ -7,8 +7,36 @@ from chatbot.bot import get_vectorstore_from_url, get_response
 load_dotenv()
 
 # Configure Streamlit app
-st.set_page_config(page_title="Chat with web", page_icon=":anchor:")
-st.title("Chat with web")
+st.set_page_config(
+    page_title="Web Chat Assistant",
+    page_icon="🌐",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'https://github.com/yourusername/chat-with-web',
+        'Report a bug': "https://github.com/yourusername/chat-with-web/issues",
+        'About': """
+        # Web Chat Assistant
+        An AI-powered chat interface for website content.
+        Built with Streamlit and LangChain.
+        """
+    }
+)
+
+# Custom CSS for better UI
+st.markdown("""
+    <style>
+    .main {
+        max-width: 1200px;
+        padding: 2rem;
+    }
+    .stButton button {
+        width: 100%;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+st.title("🤖 WebChat AI")
 
 # Create sidebar for website URL input
 with st.sidebar:
