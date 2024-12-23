@@ -1,6 +1,6 @@
-import re
+import os
 import streamlit as st
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -12,7 +12,10 @@ import chromadb
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+api_key = os.getenv("AZURE_OPENAI_API_KEY")
+api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
+api_version = os.getenv("AZURE_OPENAI_API_VERSION")
+azure_deployment = os.getenv("AZURE_DEPLOYMENT")
 
 def bs4_extractor(html: str) -> str:
     soup = BeautifulSoup(html, "lxml")
@@ -36,7 +39,11 @@ def get_vectorstore_from_url(url, depth_of_child_pages):
     
     # Initialize persistent Chroma vector database with OpenAI embeddings
     client = chromadb.PersistentClient(path="./db/chroma_db")
-    embedding_function = OpenAIEmbeddings()
+    embedding_function = AzureOpenAIEmbeddings(
+        api_key=api_key,
+        azure_endpoint=api_base,
+        openai_api_version=api_version
+    )
     vector_store = Chroma(
         client=client,
         embedding_function=embedding_function,
@@ -47,7 +54,16 @@ def get_vectorstore_from_url(url, depth_of_child_pages):
     return vector_store
 
 def get_context_retriever_chain(vector_store):
-    llm = ChatOpenAI()
+    llm = AzureChatOpenAI(
+        azure_deployment=azure_deployment,
+        api_version=api_version,
+        temperature=0,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key=api_key,
+        azure_endpoint=api_base
+    )
     retriever = vector_store.as_retriever()
     
     # Create a prompt that uses conversation history to generate relevant search queries
@@ -61,7 +77,16 @@ def get_context_retriever_chain(vector_store):
     return retriever_chain
 
 def get_conversational_rag_chain(retreiver_chain):
-    llm = ChatOpenAI()
+    llm = AzureChatOpenAI(
+        azure_deployment=azure_deployment,
+        api_version=api_version,
+        temperature=0,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key=api_key,
+        azure_endpoint=api_base
+    )
     
     # Setup RAG prompt template combining context, chat history, and user input
     prompt = ChatPromptTemplate.from_messages([

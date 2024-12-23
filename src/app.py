@@ -65,7 +65,9 @@ else:
     # Initialize chat history in session state
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = [
-            AIMessage(content="Hello, I am a bot. How can I help you?")
+            AIMessage(content="""
+            👋 Welcome! I'm your WebChat Assistant.
+            """)
         ]
     
     # Process user input and generate response
