@@ -1,4 +1,4 @@
-# Chat with Web
+# WebChat AI
 
 This project is a chatbot that allows users to interact with website content directly, enabling question-answering based on loaded web pages. Built using OpenAI’s GPT-3.5-turbo and LangChain, it uses ChromaDB for storing and retrieving vectorized content and is designed with a simple Streamlit interface.
 
