@@ -9,16 +9,20 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from bs4 import BeautifulSoup
 import chromadb
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 def bs4_extractor(html: str) -> str:
     soup = BeautifulSoup(html, "lxml")
-    return re.sub(r"\n\n+", "\n\n", soup.text).strip()
+    return soup.text
 
-def get_vectorstore_from_url(url):
+def get_vectorstore_from_url(url, depth_of_child_pages):
     # Load and split the webpage content into manageable chunks
     loader = RecursiveUrlLoader(
         url=url,
-        max_depth=2,
+        max_depth=depth_of_child_pages,
         extractor=bs4_extractor
     )
     document = loader.load()
